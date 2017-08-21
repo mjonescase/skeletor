@@ -10,7 +10,7 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
 #copy nginx stuff
 COPY nginx.conf                /etc/nginx/sites-enabled/skeletor.conf
-copy supervisord-web.conf      /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord-web.conf      /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 5000
 
