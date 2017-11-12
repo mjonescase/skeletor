@@ -1,4 +1,4 @@
-FROM python:3.5-jessie
+FROM golang:1.8.5-jessie
 
 # install stuff
 RUN apt-get update
