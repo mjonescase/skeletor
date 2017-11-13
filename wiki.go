@@ -64,7 +64,7 @@ func handleMessages() {
 
 func main() {
      // Create a simple file server
-     fs := http.FileServer(http.Dir("../public"))
+     fs := http.FileServer(http.Dir("./public"))
      http.Handle("/", fs)
      http.HandleFunc("/ws", handleConnections)
 
