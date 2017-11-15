@@ -20,6 +20,7 @@ var (
 	configFile   *string = flag.String("config", "config", "Path to config file")
 	DefaultError         = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
 	session              = &sql.DB{}
+	hashSalt             = ""
 )
 
 // define our message object

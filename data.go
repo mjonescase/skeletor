@@ -2,9 +2,11 @@ package main
 
 import (
 	"log"
+	"skeletor/utils"
 )
 
 func saveUserProfile(profile *Profile) {
+	profile.Password = utils.HashPassword(profile.Password)
 	err := session.QueryRow(`INSERT INTO profile ( 
 		firstname, 
 		lastname, 
