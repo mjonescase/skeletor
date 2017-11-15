@@ -1,3 +1,22 @@
+Vue.component('message', {
+    props: ['email', 'username', 'message'],
+    template: '<div class="d-flex align-items-end">' +
+                '<img v-bind:src="imgSrc" class="rounded-circle img-fluid">' +
+                '<div>' +
+                    '<div>{{username}}</div>' +
+                    '<div>{{displayMessage}}</div>' +
+                '</div>' +
+              '</div>',
+    computed: {
+        imgSrc: function() {
+            return 'http://www.gravatar.com/avatar/' + CryptoJS.MD5(this.email);
+        },
+        displayMessage: function() {
+            return emojione.toImage(this.message);
+        }
+    }
+});
+
 new Vue({
     el: '#app',
 
@@ -15,7 +34,6 @@ new Vue({
         this.ws = new WebSocket('ws://' + window.location.host + '/ws');
         this.ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
-            msg.message = emojione.toImage(msg.message);
             self.messages.push(msg);
 
             var element = document.getElementById('chat-messages');
@@ -31,8 +49,8 @@ new Vue({
                         email: this.email,
                         username: this.username,
                         message: $('<p>').html(this.newMsg).text() // Strip out html
-                    }
-                ));
+                    })
+                );
                 this.newMsg = ''; // Reset newMsg
             }
         },
@@ -48,9 +66,6 @@ new Vue({
             this.email = $('<p>').html(this.email).text();
             this.username = $('<p>').html(this.username).text();
             this.joined = true;
-        },
-        gravatarURL: function(email) {
-            return 'http://www.gravatar.com/avatar/' + CryptoJS.MD5(email);
         }
     }
 });
