@@ -9,6 +9,7 @@ new Vue({
 	username: null,
 	firstname: null,
 	lastname: null,
+	email: null,
 	title: null,
 	password: null,
         joined: false // True if email and username have been filled in
@@ -50,6 +51,7 @@ new Vue({
                 return
             }
 	    const mobile = this.mobilenumber;
+	    const email = this.email;
 	    const firstname = this.firstname; 
 	    const lastname = this.lastname; 
 	    const title = this.title;
@@ -65,7 +67,7 @@ new Vue({
 		//debug here. just firing and forgetting.
 	    };
             setTimeout(function () {
-	        req.send(JSON.stringify({Firstname: firstname, Lastname: lastname, Username: username, MobileNumber: mobile, Title: title, Password: password }));
+	        req.send(JSON.stringify({Firstname: firstname, Lastname: lastname, Username: username, Email: email, MobileNumber: mobile, Title: title, Password: password }));
             })
 
         },

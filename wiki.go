@@ -35,6 +35,7 @@ type Profile struct {
 	Firstname    string `json:"firstname"`
 	Lastname     string `json:"lastname"`
 	Username     string `json:"username"`
+	Email        string `json:"email"`
 	Title        string `json:"title"`
 	Password     string `json:",omitempty"`
 	MobileNumber string `json:"mobilenumber"`
