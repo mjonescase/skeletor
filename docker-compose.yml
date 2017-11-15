@@ -8,3 +8,12 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ".:/go/src/skeletor"
+    depends_on:
+      - postgres
+      
+  postgres:
+    ports:
+      - 5432:5432
+    build:
+      context: ./sql
+      dockerfile: Dockerfile
