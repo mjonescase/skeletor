@@ -20,7 +20,7 @@
 </header>
 <main id="app" class="container-fluid d-flex flex-column">
     <div class="card mb-1 mt-1 flex-1-auto">
-        <div id="chat-messages" class="card-content">
+        <div id="chat-messages" class="card-content p-1">
             <message v-for="msg in messages"
                     v-bind:message="msg.message"
                     v-bind:username="msg.username"

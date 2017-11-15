@@ -1,10 +1,10 @@
 Vue.component('message', {
     props: ['email', 'username', 'message'],
     template: '<div class="d-flex align-items-end">' +
-    '<img v-bind:src="imgSrc" class="rounded-circle img-fluid">' +
-    '<div>' +
-    '<div>{{username}}</div>' +
-    '<div>{{displayMessage}}</div>' +
+    '<img v-bind:src="imgSrc" class="rounded-circle img-fluid m-1">' +
+    '<div class="flex-1-auto mw-100">' +
+    '<div class="mw-75 p-2 rounded bg-primary text-white">{{displayMessage}}</div>' +
+    '<div class="text-muted">{{username}}</div>' +
     '</div>' +
     '</div>',
     computed: {
@@ -60,7 +60,7 @@ new Vue({
         },
         join: function () {
             if (!this.mobilenumber) {
-                Materialize.toast('You must enter an mobilenumber', 2000);
+                Materialize.toast('You must enter an mobilenumber', 2000);  //TODO Materialize isn't a thing - this is broken
                 return
             }
             if (!this.username) {
