@@ -49,29 +49,24 @@ new Vue({
                 Materialize.toast('You must choose a username', 2000);
                 return
             }
-	    this.mobilenumber = $('<p>').html(this.mobilenumber).text();
-	    this.firstname = $('<p>').html(this.firstname).text();
-	    this.lastname = $('<p>').html(this.lastname).text();
-	    this.title = $('<p>').html(this.title).text();
-	    this.password = $('<p>').html(this.password).text();
-            this.username = $('<p>').html(this.username).text();
+	    const mobile = this.mobilenumber;
+	    const firstname = this.firstname; 
+	    const lastname = this.lastname; 
+	    const title = this.title;
+	    const password = this.password;
+            const username = this.username;
             this.joined = true;
 
-	    var formData = new FormData();
-	    formData.append('mobilenumber', this.mobilenumber);
-	    formData.append('lastname', this.lastname);
-	    formData.append('title', this.title);
-	    formData.append('password', this.password);
-	    formData.append('username', this.username);
 	    var req = new XMLHttpRequest();
-
 	    req.open('POST', '/register/', true);
 	    req.withCredentials = true;
 	    req.onload = function () {
 		var data = JSON.parse(req.responseText);
 		//debug here. just firing and forgetting.
 	    };
-	    req.send(formData);
+            setTimeout(function () {
+	        req.send(JSON.stringify({Firstname: firstname, Lastname: lastname, Username: username, MobileNumber: mobile, Title: title, Password: password }));
+            })
 
         },
         gravatarURL: function(email) {

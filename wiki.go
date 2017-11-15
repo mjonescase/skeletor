@@ -35,8 +35,8 @@ type Profile struct {
 	Lastname     string `json:"lastname"`
 	Username     string `json:"username"`
 	Title        string `json:"title"`
-	Password     string `json:"-"`
-	MobileNumber string `json:"mobile"`
+	Password     string `json:",omitempty"`
+	MobileNumber string `json:"mobilenumber"`
 }
 
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
@@ -100,9 +100,9 @@ func initDb() {
 	var err error
 	session, err = sql.Open(
 		"postgres", "host="+config["dbhost"]+
-			"user="+config["dbuser"]+
-			"dbname="+config["dbname"]+
-			"sslmode="+config["dbsslmode"])
+			" user="+config["dbuser"]+
+			" dbname="+config["dbname"]+
+			" sslmode="+config["sslmode"])
 
 	if err != nil {
 		panic(err)
