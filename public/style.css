@@ -8,6 +8,10 @@ main {
     flex: 1 0 auto;
 }
 
+.flex-1-auto {
+    flex: 1 1 auto;
+}
+
 #chat-messages {
     min-height: 10vh;
     height: 60vh;
