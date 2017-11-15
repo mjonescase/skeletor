@@ -5,8 +5,12 @@ new Vue({
         ws: null, // Our websocket
         newMsg: '', // Holds new messages to be sent to the server
         messages: [], // A running list of chat messages displayed on the screen
-        email: null, // Email address used for grabbing an avatar
-        username: null, // Our username
+	mobilenumber: null,
+	username: null,
+	firstname: null,
+	lastname: null,
+	title: null,
+	password: null,
         joined: false // True if email and username have been filled in
     },
 
@@ -28,7 +32,7 @@ new Vue({
             if (this.newMsg != '') {
                 this.ws.send(
                     JSON.stringify({
-                        email: this.email,
+                        email: this.mobilenumber,
                         username: this.username,
                         message: $('<p>').html(this.newMsg).text() // Strip out html
                     }
@@ -37,17 +41,38 @@ new Vue({
             }
         },
         join: function () {
-            if (!this.email) {
-                Materialize.toast('You must enter an email', 2000);
+            if (!this.mobilenumber) {
+                Materialize.toast('You must enter an mobilenumber', 2000);
                 return
             }
             if (!this.username) {
                 Materialize.toast('You must choose a username', 2000);
                 return
             }
-            this.email = $('<p>').html(this.email).text();
+	    this.mobilenumber = $('<p>').html(this.mobilenumber).text();
+	    this.firstname = $('<p>').html(this.firstname).text();
+	    this.lastname = $('<p>').html(this.lastname).text();
+	    this.title = $('<p>').html(this.title).text();
+	    this.password = $('<p>').html(this.password).text();
             this.username = $('<p>').html(this.username).text();
             this.joined = true;
+
+	    var formData = new FormData();
+	    formData.append('mobilenumber', this.mobilenumber);
+	    formData.append('lastname', this.lastname);
+	    formData.append('title', this.title);
+	    formData.append('password', this.password);
+	    formData.append('username', this.username);
+	    var req = new XMLHttpRequest();
+
+	    req.open('POST', '/register/', true);
+	    req.withCredentials = true;
+	    req.onload = function () {
+		var data = JSON.parse(req.responseText);
+		//debug here. just firing and forgetting.
+	    };
+	    req.send(formData);
+
         },
         gravatarURL: function(email) {
             return 'http://www.gravatar.com/avatar/' + CryptoJS.MD5(email);
