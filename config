@@ -1,0 +1,6 @@
+{
+        "dbhost": "localhost",
+        "dbuser": "skeletor",
+        "dbname": "skeletor",
+        "sslmode": "disable"
+}
