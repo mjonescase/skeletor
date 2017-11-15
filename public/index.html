@@ -18,8 +18,8 @@
         <a href="/" class="navbar-brand">Simple Chat</a>
     </nav>
 </header>
-<main id="app" class="container-fluid">
-    <div class="card">
+<main id="app" class="container-fluid d-flex flex-column">
+    <div class="card mb-1 mt-1 flex-1-auto">
         <div id="chat-messages" class="card-content">
             <div class="d-flex" v-for="msg in messages">
                 <img v-bind:src="gravatarURL(msg.email)">
@@ -40,10 +40,10 @@
         </div>
     </div>
     <div class="row d-flex flex-row flex-wrap" v-if="!joined">
-        <div class="col-sm-8 mb-sm">
+        <div class="col-sm-8 mb-1">
             <input type="email" v-model.trim="email" placeholder="Email" class="form-control">
         </div>
-        <div class="col-sm-8 mb-sm">
+        <div class="col-sm-8 mb-1">
             <input type="text" v-model.trim="username" placeholder="Username" class="form-control">
         </div>
         <div class="col-sm-4">
