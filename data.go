@@ -5,7 +5,7 @@ import (
 )
 
 func saveUserProfile(profile *Profile) {
-	err := session.QueryRow(`INSERT INTO user ( 
+	err := session.QueryRow(`INSERT INTO profile ( 
 		firstname, 
 		lastname, 
 		username, 
@@ -22,4 +22,5 @@ func saveUserProfile(profile *Profile) {
 	if err != nil {
 		log.Print(err)
 	}
+	profile.Password = ""
 }

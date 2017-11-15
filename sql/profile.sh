@@ -9,6 +9,6 @@ CREATE TABLE profile (
         username varchar(255),
         title varchar(255),
         password varchar(255),
-        mobilephone varchar(255)
+        mobilenumber varchar(255)
 );
 EOSQL

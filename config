@@ -1,6 +1,6 @@
 {
-        "dbhost": "localhost",
-        "dbuser": "skeletor",
+        "dbhost": "postgres",
+        "dbuser": "postgres",
         "dbname": "skeletor",
         "sslmode": "disable"
 }
