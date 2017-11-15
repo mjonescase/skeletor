@@ -77,6 +77,11 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	allUsersExceptMe := getAllUsers()
+	log.Printf("got all the users")
+	for _, element := range allUsersExceptMe {
+		log.Printf("user ID: %s", element.Id)
+	}
 	saveUserProfile(&request)
 	utils.MustEncode(rw, request)
 }

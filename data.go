@@ -5,12 +5,12 @@ import (
 )
 
 func saveUserProfile(profile *Profile) {
-	err := session.QueryRow(`INSERT INTO profile ( 
-		firstname, 
-		lastname, 
-		username, 
-		title, 
-		password, 
+	err := session.QueryRow(`INSERT INTO profile (
+		firstname,
+		lastname,
+		username,
+		title,
+		password,
 		mobilenumber
 	) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`,
 		profile.Firstname,
@@ -23,4 +23,30 @@ func saveUserProfile(profile *Profile) {
 		log.Print(err)
 	}
 	profile.Password = ""
+}
+
+func getAllUsers() []Profile {
+	profile := Profile{}
+	results := []Profile{}
+	rows, err := session.Query(`SELECT id, firstname, lastname, username,
+title, mobilenumber FROM profile`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		log.Printf("got another user")
+		profile = Profile{}
+		if err := rows.Scan(&profile.Id,
+			&profile.Firstname,
+			&profile.Lastname,
+			&profile.Username,
+			&profile.Title,
+			&profile.MobileNumber,
+		); err != nil {
+			log.Fatal(err)
+		}
+		results = append(results, profile)
+	}
+	return results
 }
