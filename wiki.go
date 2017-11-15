@@ -9,15 +9,17 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"skeletor/utils"
 )
 
 var (
-	clients            = make(map[*websocket.Conn]bool) // connected clients
-	broadcast          = make(chan Message)             // broadcast channel
-	upgrader           = websocket.Upgrader{}           // configure the upgrader
-	config             = map[string]string{}
-	configFile *string = flag.String("config", "config", "Path to config file")
-	session            = &sql.DB{}
+	clients              = make(map[*websocket.Conn]bool) // connected clients
+	broadcast            = make(chan Message)             // broadcast channel
+	upgrader             = websocket.Upgrader{}           // configure the upgrader
+	config               = map[string]string{}
+	configFile   *string = flag.String("config", "config", "Path to config file")
+	DefaultError         = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
+	session              = &sql.DB{}
 )
 
 // define our message object
@@ -33,7 +35,7 @@ type Profile struct {
 	Lastname     string `json:"lastname"`
 	Username     string `json:"username"`
 	Title        string `json:"title"`
-	Password     string // TODO don't send this back
+	Password     string `json:"-"`
 	MobileNumber string `json:"mobile"`
 }
 
@@ -62,6 +64,21 @@ func handleConnections(writer http.ResponseWriter, request *http.Request) {
 		// Send the newly received message to the broadcast channel
 		broadcast <- msg
 	}
+}
+
+func handleRegistration(rw http.ResponseWriter, req *http.Request) {
+	request := Profile{}
+
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&request)
+
+	if err != nil {
+		utils.MustEncode(rw, DefaultError)
+		return
+	}
+
+	saveUserProfile(&request)
+	utils.MustEncode(rw, request)
 }
 
 func handleMessages() {
@@ -105,10 +122,14 @@ func initConfig() {
 }
 
 func main() {
+	initConfig()
+	initDb()
+
 	// Create a simple file server
 	fs := http.FileServer(http.Dir("./public"))
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/register/", handleRegistration)
 
 	// Start listening for incoming chat messages
 	go handleMessages()
