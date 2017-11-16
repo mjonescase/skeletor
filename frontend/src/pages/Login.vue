@@ -1,22 +1,18 @@
 <template>
-  <div class='ui centered card'>
-    <div class='content'>
-      <div class='ui form'>
-        <div class='field'>
+  <div class='d-flex justify-content-center align-items-center'>
+      <div class='form'>
+        <div class='form-group'>
           <label>Username</label>
-          <input v-model="username" type='text' ref='username' defaultValue="">
+          <input v-model="username" type='text' ref='username' defaultValue="" class="form-control">
         </div>
-        <div class='field'>
+        <div class='form-group'>
           <label>Password</label>
-          <input v-model="passphrase" type='password' ref='passphrase' defaultValue="">
+          <input v-model="passphrase" type='password' ref='passphrase' defaultValue="" class="form-control">
         </div>
-        <div class='ui two button attached buttons'>
-          <button class='ui basic blue button' v-on:click="saveForm">
-            Login
-          </button>
-        </div>
+        <button class='btn btn-primary' v-on:click="saveForm">
+          Login
+        </button>
       </div>
-    </div>
   </div>
 </template>
 

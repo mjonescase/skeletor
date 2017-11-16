@@ -1,26 +1,21 @@
 <template>
   <div>
-    <header>
-      <nav class="navbar navbar-dark bg-primary">
-        <a href="/" class="navbar-brand">Simple Chat</a>
-      </nav>
-    </header>
     <main id="app" class="container-fluid d-flex flex-column">
-     <div class="row">
-       <div class="col-sm-8">
-	 <div class="card mb-1 mt-1 flex-1-auto">
-	   <div id="chat-messages" class="card-content p-1">
-             <message v-for="msg in messages"
-                      v-bind:message="msg"></message>
-	   </div>
-	 </div>
-       </div>
-       <div class="col-sm-4">
-	 <contact v-for="contact in contacts"
-		  v-bind:contact="contact"></contact>
-       </div>
-     </div>
-     <div class="row d-flex flex-row flex-wrap" v-if="joined">
+      <div class="row">
+        <div class="col-sm-8">
+          <div class="card mb-1 mt-1 flex-1-auto">
+            <div id="chat-messages" class="card-content p-1">
+              <message v-for="msg in messages"
+                       v-bind:message="msg"></message>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <contact v-for="contact in contacts"
+                   v-bind:contact="contact"></contact>
+        </div>
+      </div>
+      <div class="row d-flex flex-row flex-wrap">
         <div class="col-sm-8 mb-sm">
           <input type="text" class="form-control" v-model="newMsg" @keyup.enter="send">
         </div>
@@ -29,35 +24,6 @@
           <button class="btn btn-primary" @click="send">
             <i class="material-icons right">chat</i>
             Send
-          </button>
-        </div>
-      </div>
-      <div class="row d-flex flex-row flex-wrap" v-if="!joined">
-        <div class="col-sm-8 mb-1">
-          <input type="text" v-model.trim="mobilenumber" placeholder="Mobile Number" class="form-control">
-        </div>
-        <div class="col-sm-8 mb-1">
-          <input type="text" v-model.trim="username" placeholder="Username" class="form-control">
-        </div>
-        <div class="col-sm-8 mb-1">
-          <input type="text" v-model.trim="firstname" placeholder="First Name" class="form-control">
-        </div>
-        <div class="col-sm-8 mb-1">
-          <input type="text" v-model.trim="lastname" placeholder="Last Name" class="form-control">
-        </div>
-        <div class="col-sm-8 mb-1">
-          <input type="text" v-model.trim="email" placeholder="me@you.com" class="form-control">
-        </div>
-        <div class="col-sm-8 mb-1">
-          <input type="text" v-model.trim="title" placeholder="Title (ex: CNA)" class="form-control">
-        </div>
-        <div class="col-sm-8 mb-1">
-          <input type="password" v-model.trim="password" placeholder="Password" class="form-control">
-        </div>
-        <div class="col-sm-4">
-          <button class="btn btn-primary btn-small" @click="join()">
-            <i class="material-icons right">done</i>
-            Join
           </button>
         </div>
       </div>
@@ -89,8 +55,7 @@
         lastname: null,
         email: null,
         title: null,
-        password: null,
-        joined: false // True if email and username have been filled in
+        password: null
       }
     },
 
@@ -106,10 +71,10 @@
           var element = document.getElementById('chat-messages');
           element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
         }
-	else if (data.type === 1) {
-	    console.log(msg);
-	    self.contacts=msg;
-	}
+        else if (data.type === 1) {
+            console.log(msg);
+            self.contacts=msg;
+        }
       });
     },
 
@@ -129,43 +94,6 @@
           );
           this.newMsg = ''; // Reset newMsg
         }
-      },
-      join: function () {
-        if (!this.mobilenumber) {
-          Materialize.toast('You must enter an mobilenumber', 2000);  //TODO Materialize isn't a thing - this is broken
-          return
-        }
-        if (!this.username) {
-          Materialize.toast('You must choose a username', 2000);
-          return
-        }
-        const mobile = this.mobilenumber;
-        const email = this.email;
-        const firstname = this.firstname;
-        const lastname = this.lastname;
-        const title = this.title;
-        const password = this.password;
-        const username = this.username;
-        this.joined = true;
-
-        var req = new XMLHttpRequest();
-        req.open('POST', '/register/', true);
-        req.withCredentials = true;
-        req.onload = function () {
-          var data = JSON.parse(req.responseText);
-          //debug here. just firing and forgetting.
-        };
-        setTimeout(function () {
-          req.send(JSON.stringify({
-            Firstname: firstname,
-            Lastname: lastname,
-            Username: username,
-            Email: email,
-            MobileNumber: mobile,
-            Title: title,
-            Password: password
-          }));
-        })
       }
     }
   }
