@@ -9,7 +9,7 @@
       <div class="card mb-1 mt-1 flex-1-auto">
         <div id="chat-messages" class="card-content p-1">
           <message v-for="msg in messages"
-                   v-bind:contents="msg.contents"></message>
+                   v-bind:message="msg"></message>
         </div>
       </div>
       <div class="row d-flex flex-row flex-wrap" v-if="joined">
@@ -88,8 +88,8 @@
       this.ws.addEventListener('message', function (e) {
         var data = JSON.parse(e.data);
         var msg = data.contents;
-        console.log(e);
-        if (data.type === 1) {
+        console.log(e, msg);
+        if (data.type === 0) {
           self.messages.push(msg);
           var element = document.getElementById('chat-messages');
           element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
