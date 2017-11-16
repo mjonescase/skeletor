@@ -171,8 +171,11 @@ type Prox struct {
 }
 
 func New(target string) *Prox {
-	url, _ := url.Parse(target)
+	url, err := url.Parse(target)
 
+	if err != nil {
+		panic(err)
+	}
 	return &Prox{target: url, proxy: httputil.NewSingleHostReverseProxy(url)}
 }
 
@@ -201,7 +204,7 @@ func main() {
 	initDb()
 
 	// Create a simple file server
-	proxy := New("0.0.0.0:8080")
+	proxy := New("http://0.0.0.0:8080")
 	//fs := http.FileServer(http.Dir("./public"))
 	http.HandleFunc("/", proxy.handle)
 	http.HandleFunc("/ws", handleConnections)
