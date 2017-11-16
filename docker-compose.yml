@@ -1,5 +1,15 @@
 version: '2'
 services:
+  frontend:
+    ports:
+      - "8080:8080"
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - "./frontend/src:/app/src"
+    depends_on:
+      - skeletor
   skeletor:
     ports:
       - "5000:5000"
@@ -10,7 +20,7 @@ services:
       - ".:/go/src/skeletor"
     depends_on:
       - postgres
-      
+
   postgres:
     ports:
       - 5432:5432
