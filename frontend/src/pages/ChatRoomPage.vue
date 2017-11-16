@@ -48,14 +48,7 @@
         ws: null, // Our websocket
         newMsg: '', // Holds new messages to be sent to the server
         messages: [], // A running list of chat messages displayed on the screen
-        contacts: [], // A running list of chat messages displayed on the screen
-        mobilenumber: null,
-        username: null,
-        firstname: null,
-        lastname: null,
-        email: null,
-        title: null,
-        password: null
+        contacts: [] // A running list of chat messages displayed on the screen
       }
     },
 
@@ -81,13 +74,14 @@
     methods: {
       send: function () {
         if (this.newMsg != '') {
+          var user = JSON.parse(localStorage.getItem('user')) || {};
           this.ws.send(
             JSON.stringify({
               type: 0,
               contents: {
-                email: this.email,
-                mobilenumber: this.mobilenumber,
-                username: this.username,
+                email: user.email,
+                mobilenumber: user.mobilenumber,
+                username: user.username,
                 message: $('<p>').html(this.newMsg).text() // Strip out html
               }
             })

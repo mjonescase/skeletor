@@ -36,6 +36,7 @@
 
           req.onload = function () {
             var data = JSON.parse(req.responseText);
+            localStorage.setItem('user', req.responseText);
             if (req.status === 200) {
               self.$router.push('/');
             }
