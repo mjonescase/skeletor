@@ -14,7 +14,7 @@ import (
 
 var (
 	clients              = make(map[*websocket.Conn]bool) // connected clients
-	broadcast            = make(chan Message)             // broadcast channel
+	broadcast            = make(chan PublishedContent)    // broadcast channel
 	upgrader             = websocket.Upgrader{}           // configure the upgrader
 	config               = map[string]string{}
 	configFile   *string = flag.String("config", "config", "Path to config file")
@@ -22,6 +22,12 @@ var (
 	AuthError            = map[string]string{"ErrorReason": "You are not authorized to perform this action"}
 	session              = &sql.DB{}
 	hashSalt             = ""
+)
+
+// published content type enum
+const (
+	PUBTYPE_MESSAGE  = iota // 0
+	PUBTYPE_CONTACTS = iota // 1
 )
 
 // define our message object
@@ -42,6 +48,11 @@ type Profile struct {
 	MobileNumber string `json:"mobilenumber"`
 }
 
+type PublishedContent struct {
+	Type     int     `json:"type"` // either PUBTYPE_MESSAGE or PUBTYPE_CONTACTS
+	Contents Message `json:"contents"`
+}
+
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
 	ws, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
@@ -55,7 +66,7 @@ func handleConnections(writer http.ResponseWriter, request *http.Request) {
 	clients[ws] = true
 
 	for {
-		var msg Message
+		var msg PublishedContent
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
 		if err != nil {
@@ -110,11 +121,6 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	allUsersExceptMe := getAllUsers()
-	log.Printf("got all the users")
-	for _, element := range allUsersExceptMe {
-		log.Printf("user ID: %s", element.Id)
-	}
 	saveUserProfile(&request)
 	utils.MustEncode(rw, request)
 }

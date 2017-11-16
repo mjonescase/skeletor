@@ -38,7 +38,8 @@ new Vue({
         var self = this;
         this.ws = new WebSocket('ws://' + window.location.host + '/ws');
         this.ws.addEventListener('message', function (e) {
-            var msg = JSON.parse(e.data);
+            var msg = JSON.parse(e.data).contents;
+	    console.log(e);
             self.messages.push(msg);
 
             var element = document.getElementById('chat-messages');
@@ -50,12 +51,15 @@ new Vue({
         send: function () {
             if (this.newMsg != '') {
                 this.ws.send(
-                    JSON.stringify({
-                        email: this.mobilenumber,
-                        username: this.username,
-                        message: $('<p>').html(this.newMsg).text() // Strip out html
+		    JSON.stringify({
+			type: 0,
+			contents: {
+                            email: this.mobilenumber,
+                            username: this.username,
+                            message: $('<p>').html(this.newMsg).text() // Strip out html
+			}
                     })
-                );
+		);
                 this.newMsg = ''; // Reset newMsg
             }
         },
