@@ -20,7 +20,7 @@
 		  v-bind:contact="contact"></contact>
        </div>
      </div>
-      <div class="row d-flex flex-row flex-wrap" v-if="joined">
+     <div class="row d-flex flex-row flex-wrap" v-if="joined">
         <div class="col-sm-8 mb-sm">
           <input type="text" class="form-control" v-model="newMsg" @keyup.enter="send">
         </div>
@@ -69,17 +69,20 @@
 
 <script>
   import Message from '../components/Message.vue';
+  import Contact from '../components/Contact.vue';
 
   export default {
     name: 'chatRoomPage',
     components: {
-      Message
+      Message,
+      Contact
     },
     data: function () {
       return {
         ws: null, // Our websocket
         newMsg: '', // Holds new messages to be sent to the server
         messages: [], // A running list of chat messages displayed on the screen
+        contacts: [], // A running list of chat messages displayed on the screen
         mobilenumber: null,
         username: null,
         firstname: null,
@@ -101,11 +104,11 @@
         if (data.type === 0) {
           self.messages.push(msg);
           var element = document.getElementById('chat-messages');
-          element.scrollTop = element.scrollHeight; // Auto scroll to the bottom1
+          element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
         }
 	else if (data.type === 1) {
 	    console.log(msg);
-	    this.contacts=msg;
+	    self.contacts=msg;
 	}
       });
     },
