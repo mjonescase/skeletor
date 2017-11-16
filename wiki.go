@@ -20,6 +20,7 @@ var (
 	configFile   *string = flag.String("config", "config", "Path to config file")
 	DefaultError         = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
 	session              = &sql.DB{}
+	hashSalt             = ""
 )
 
 // define our message object
@@ -34,6 +35,7 @@ type Profile struct {
 	Firstname    string `json:"firstname"`
 	Lastname     string `json:"lastname"`
 	Username     string `json:"username"`
+	Email        string `json:"email"`
 	Title        string `json:"title"`
 	Password     string `json:",omitempty"`
 	MobileNumber string `json:"mobilenumber"`
