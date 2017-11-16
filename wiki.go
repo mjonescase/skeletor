@@ -117,6 +117,7 @@ func handleLogin(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
 	utils.MustEncode(rw, request)
 }
 
