@@ -1,10 +1,5 @@
 <template>
   <div>
-    <header>
-      <nav class="navbar navbar-dark bg-primary">
-        <a href="/" class="navbar-brand">Simple Chat</a>
-      </nav>
-    </header>
     <main id="app" class="container-fluid d-flex flex-column">
       <div class="row">
         <div class="col-sm-8">
@@ -60,8 +55,7 @@
         lastname: null,
         email: null,
         title: null,
-        password: null,
-        joined: false // True if email and username have been filled in
+        password: null
       }
     },
 
