@@ -1,0 +1,24 @@
+Go has really good profiling tools built into the standard library.
+
+cpu profiling - stack sampling
+heap profiling - small amount of allocations are sampled including call stack
+block profiling - lock contentions
+
+tracing, etc all in pprof
+
+Ways to profile:
+1. Instrument your binary during testing and benchmarking:
+go test -cpuprofile -memprofile
+
+2. import _ net/http/pprof that exposes /debug/pprof endpoints to your app
+        - Once those are enabled a simple command will take a sample:
+          go tool pprof -seconds 5 http://localhost:5000/debug/pprof/profile
+
+3. for debugging memory leaks or something really difficult, you can
+instrument things in your application where you think the issue is. 
+        runtime.StartCPUProfile or runtime.WriteHeapProfile
+
+go tool pprof will analyze these profiles.
+
+
+
