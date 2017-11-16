@@ -48,6 +48,7 @@
     },
     methods: {
       join: function () {
+        var self = this;
         if (!this.mobilenumber) {
           Materialize.toast('You must enter an mobilenumber', 2000);  //TODO Materialize isn't a thing - this is broken
           return
@@ -70,7 +71,7 @@
         req.withCredentials = true;
         req.onload = function () {
           var data = JSON.parse(req.responseText);
-          this.$router.push('/');
+          self.$router.push('/');
           //debug here. just firing and forgetting.
         };
         setTimeout(function () {
