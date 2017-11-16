@@ -54,8 +54,8 @@ type Profile struct {
 }
 
 type PublishedContent struct {
-	Type     int     `json:"type"` // either PUBTYPE_MESSAGE or PUBTYPE_CONTACTS
-	Contents Message `json:"contents"`
+	Type     int         `json:"type"` // either PUBTYPE_MESSAGE or PUBTYPE_CONTACTS
+	Contents interface{} `json:"contents"`
 }
 
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
@@ -127,6 +127,8 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	saveUserProfile(&request)
+	// broadcast the new user
+	broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
 	utils.MustEncode(rw, request)
 }
 

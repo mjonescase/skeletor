@@ -38,12 +38,14 @@ new Vue({
         var self = this;
         this.ws = new WebSocket('ws://' + window.location.host + '/ws');
         this.ws.addEventListener('message', function (e) {
-            var msg = JSON.parse(e.data).contents;
+	    var data = JSON.parse(e.data);
+            var msg = data.contents;
 	    console.log(e);
-            self.messages.push(msg);
-
-            var element = document.getElementById('chat-messages');
-            element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+	    if (data.type === 1) {
+		self.messages.push(msg);
+		var element = document.getElementById('chat-messages');
+		element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+	    }
         });
     },
 
