@@ -34,13 +34,15 @@ func queryUserCredential(profile *Profile) bool {
 	result := false
 
 	err := session.QueryRow(`SELECT 
+		id,
 		firstname, 
 		lastname, 
 		username, 
 		email, 
 		title, 
 		mobilenumber FROM profile WHERE 
-		username = $1 AND password = $2`, profile.Username, profile.Password).Scan(&profile.Firstname,
+		username = $1 AND password = $2`, profile.Username, profile.Password).Scan(&profile.Id,
+		&profile.Firstname,
 		&profile.Lastname,
 		&profile.Username,
 		&profile.Email,
@@ -55,6 +57,7 @@ func queryUserCredential(profile *Profile) bool {
 		result = true
 	}
 
+	profile.Password = ""
 	return result
 }
 
@@ -68,7 +71,6 @@ title, mobilenumber FROM profile`)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		log.Printf("got another user")
 		profile = Profile{}
 		if err := rows.Scan(&profile.Id,
 			&profile.Firstname,

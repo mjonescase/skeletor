@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"regexp"
 	"skeletor/utils"
+	"time"
 )
 
 var (
@@ -105,6 +106,10 @@ func handleLogin(rw http.ResponseWriter, req *http.Request) {
 
 	authenticated := validateLogin(&request)
 	if authenticated {
+		sessionInfo := fmt.Sprintf("{'username': '%s', 'id': '%s', 'email': '%s'}", request.Username, request.Id, request.Email)
+		expire := time.Now().AddDate(0, 0, 1)
+		cookie := http.Cookie{"SessionInfo", sessionInfo, "/", config["hostname"], expire, expire.Format(time.UnixDate), 86400, true, false, "", []string{""}}
+		http.SetCookie(rw, &cookie)
 		rw.WriteHeader(http.StatusOK)
 	} else {
 		rw.WriteHeader(http.StatusUnauthorized)
