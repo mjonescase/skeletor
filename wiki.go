@@ -4,11 +4,16 @@ import (
 	"database/sql"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	_ "net/http/pprof"
+	"net/url"
+	"regexp"
 	"skeletor/utils"
 )
 
@@ -159,13 +164,46 @@ func initConfig() {
 	}
 }
 
+type Prox struct {
+	target        *url.URL
+	proxy         *httputil.ReverseProxy
+	routePatterns []*regexp.Regexp // add some route patterns with regexp
+}
+
+func New(target string) *Prox {
+	url, _ := url.Parse(target)
+
+	return &Prox{target: url, proxy: httputil.NewSingleHostReverseProxy(url)}
+}
+
+func (p *Prox) handle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("X-GoProxy", "GoProxy")
+
+	if p.routePatterns == nil || p.parseWhiteList(r) {
+		p.proxy.ServeHTTP(w, r)
+	}
+}
+
+func (p *Prox) parseWhiteList(r *http.Request) bool {
+	for _, regexp := range p.routePatterns {
+		fmt.Println(r.URL.Path)
+		if regexp.MatchString(r.URL.Path) {
+			// let's forward it
+			return true
+		}
+	}
+	fmt.Println("Not accepted routes %x", r.URL.Path)
+	return false
+}
+
 func main() {
 	initConfig()
 	initDb()
 
 	// Create a simple file server
-	fs := http.FileServer(http.Dir("./public"))
-	http.Handle("/", fs)
+	proxy := New("0.0.0.0:8080")
+	//fs := http.FileServer(http.Dir("./public"))
+	http.HandleFunc("/", proxy.handle)
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
 	http.HandleFunc("/login/", handleLogin)
