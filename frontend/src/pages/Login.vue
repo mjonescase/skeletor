@@ -31,11 +31,14 @@
           const passphrase = this.passphrase;
           var self = this;
           var req = new XMLHttpRequest();
-          req.open('POST', 'http://localhost:5000/login/', true)
+          req.open('POST', '/login/', true)
           req.withCredentials = true
 
           req.onload = function () {
             var data = JSON.parse(req.responseText);
+            if (req.status === 200) {
+              self.$router.push('/');
+            }
           }
 
           setTimeout(function () {
