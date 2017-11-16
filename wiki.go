@@ -19,6 +19,7 @@ var (
 	config               = map[string]string{}
 	configFile   *string = flag.String("config", "config", "Path to config file")
 	DefaultError         = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
+	AuthError            = map[string]string{"ErrorReason": "You are not authorized to perform this action"}
 	session              = &sql.DB{}
 	hashSalt             = ""
 )
@@ -66,6 +67,36 @@ func handleConnections(writer http.ResponseWriter, request *http.Request) {
 		// Send the newly received message to the broadcast channel
 		broadcast <- msg
 	}
+}
+
+func validateLogin(req *Profile) bool {
+	result := false
+	req.Password = utils.HashPassword(req.Password)
+	result = queryUserCredential(req)
+	return result
+}
+
+func handleLogin(rw http.ResponseWriter, req *http.Request) {
+	request := Profile{}
+
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&request)
+
+	if err != nil {
+		utils.MustEncode(rw, AuthError)
+		return
+	}
+
+	authenticated := validateLogin(&request)
+	if authenticated {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		rw.WriteHeader(http.StatusUnauthorized)
+		utils.MustEncode(rw, AuthError)
+		return
+	}
+
+	utils.MustEncode(rw, request)
 }
 
 func handleRegistration(rw http.ResponseWriter, req *http.Request) {
@@ -132,6 +163,7 @@ func main() {
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
+	http.HandleFunc("/login/", handleLogin)
 
 	// Start listening for incoming chat messages
 	go handleMessages()

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"skeletor/utils"
 )
@@ -27,4 +28,32 @@ func saveUserProfile(profile *Profile) {
 		log.Print(err)
 	}
 	profile.Password = ""
+}
+
+func queryUserCredential(profile *Profile) bool {
+	result := false
+
+	err := session.QueryRow(`SELECT 
+		firstname, 
+		lastname, 
+		username, 
+		email, 
+		title, 
+		mobilenumber FROM profile WHERE 
+		username = $1 AND password = $2`, profile.Username, profile.Password).Scan(&profile.Firstname,
+		&profile.Lastname,
+		&profile.Username,
+		&profile.Email,
+		&profile.Title,
+		&profile.MobileNumber)
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("No user with that ID.")
+	case err != nil:
+		log.Fatal(err)
+	default:
+		result = true
+	}
+
+	return result
 }
