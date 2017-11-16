@@ -37,7 +37,7 @@ new Vue({
     created: function () {
         var self = this;
         this.ws = new WebSocket('ws://' + window.location.host + '/ws');
-        this.ws.addEventListener('message', function (e) {
+        this.ws.addEventListener('firstname', function (e) {
             var msg = JSON.parse(e.data);
             self.messages.push(msg);
 
@@ -95,6 +95,17 @@ new Vue({
                     Password: password
                 }));
             })
+
+	    //subscribe to the "contacts" websocket
+	    console.log('subscribing to contacts websocket');
+            var self = this;
+            this.profile_ws = new WebSocket('ws://' + window.location.host + '/contacts/');
+            this.profile_ws.addEventListener('message', function (e) {
+		debugger;
+		var contacts = JSON.parse(e.data);
+		console.log('got new contacts', contacts);
+                message: $('<p>').html(contacts) // Strip out html
+            });
         }
     }
 });

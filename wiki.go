@@ -13,14 +13,16 @@ import (
 )
 
 var (
-	clients              = make(map[*websocket.Conn]bool) // connected clients
-	broadcast            = make(chan Message)             // broadcast channel
-	upgrader             = websocket.Upgrader{}           // configure the upgrader
-	config               = map[string]string{}
-	configFile   *string = flag.String("config", "config", "Path to config file")
-	DefaultError         = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
-	session              = &sql.DB{}
-	hashSalt             = ""
+	clients                  = make(map[*websocket.Conn]bool) // connected clients to messages
+	broadcast                = make(chan Message)             // messages broadcast channel
+	profileClients           = make(map[*websocket.Conn]bool) // clients connected to profile
+	profileBroadcast         = make(chan []Profile)           // contacts list broadcast channel
+	upgrader                 = websocket.Upgrader{}           // configure the upgrader
+	config                   = map[string]string{}
+	configFile       *string = flag.String("config", "config", "Path to config file")
+	DefaultError             = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
+	session                  = &sql.DB{}
+	hashSalt                 = ""
 )
 
 // define our message object
@@ -39,6 +41,24 @@ type Profile struct {
 	Title        string `json:"title"`
 	Password     string `json:",omitempty"`
 	MobileNumber string `json:"mobilenumber"`
+}
+
+func handleProfileConnection(writer http.ResponseWriter, request *http.Request) {
+	ws, err := upgrader.Upgrade(writer, request, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer ws.Close()
+	profileClients[ws] = true
+
+	//send an update every time a new client registers here
+	log.Printf("broadcasting all the users")
+	profileBroadcast <- getAllUsers()
+
+	// not sure if this is necessary. We don't need to read anything on this channel.
+	for {
+	}
 }
 
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
@@ -79,11 +99,6 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	allUsersExceptMe := getAllUsers()
-	log.Printf("got all the users")
-	for _, element := range allUsersExceptMe {
-		log.Printf("user ID: %s", element.Id)
-	}
 	saveUserProfile(&request)
 	utils.MustEncode(rw, request)
 }
@@ -136,6 +151,7 @@ func main() {
 	fs := http.FileServer(http.Dir("./public"))
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/contacts/", handleProfileConnection)
 	http.HandleFunc("/register/", handleRegistration)
 
 	// Start listening for incoming chat messages

@@ -11,15 +11,15 @@ func saveUserProfile(profile *Profile) {
 		firstname,
 		lastname,
 		username,
-		email,
+		-- email,
 		title,
 		password,
 		mobilenumber
-	) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+	) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`,
 		profile.Firstname,
 		profile.Lastname,
 		profile.Username,
-		profile.Email,
+		// profile.Email,
 		profile.Title,
 		profile.Password,
 		profile.MobileNumber).Scan(&profile.Id)
