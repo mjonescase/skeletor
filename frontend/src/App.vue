@@ -1,60 +1,166 @@
 <template>
-  <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
+  <div>
+  <header>
+    <nav class="navbar navbar-dark bg-primary">
+      <a href="/" class="navbar-brand">Simple Chat</a>
+    </nav>
+  </header>
+  <main id="app" class="container-fluid d-flex flex-column">
+    <div class="card mb-1 mt-1 flex-1-auto">
+      <div id="chat-messages" class="card-content p-1">
+        <message v-for="msg in messages"
+                 v-bind:message="msg.message"
+                 v-bind:username="msg.username"
+                 v-bind:email="msg.email"></message>
+      </div>
+    </div>
+    <div class="row d-flex flex-row flex-wrap" v-if="joined">
+      <div class="col-sm-8 mb-sm">
+        <input type="text" class="form-control" v-model="newMsg" @keyup.enter="send">
+      </div>
+      <div class="col-sm-4">
+        <button class="btn btn-primary" @click="send">
+          <i class="material-icons right">chat</i>
+          Send
+        </button>
+      </div>
+    </div>
+    <div class="row d-flex flex-row flex-wrap" v-if="!joined">
+      <div class="col-sm-8 mb-1">
+        <input type="text" v-model.trim="mobilenumber" placeholder="Mobile Number" class="form-control">
+      </div>
+      <div class="col-sm-8 mb-1">
+        <input type="text" v-model.trim="username" placeholder="Username" class="form-control">
+      </div>
+      <div class="col-sm-8 mb-1">
+        <input type="text" v-model.trim="firstname" placeholder="First Name" class="form-control">
+      </div>
+      <div class="col-sm-8 mb-1">
+        <input type="text" v-model.trim="lastname" placeholder="Last Name" class="form-control">
+      </div>
+      <div class="col-sm-8 mb-1">
+        <input type="text" v-model.trim="email" placeholder="me@you.com" class="form-control">
+      </div>
+      <div class="col-sm-8 mb-1">
+        <input type="text" v-model.trim="title" placeholder="Title (ex: CNA)" class="form-control">
+      </div>
+      <div class="col-sm-8 mb-1">
+        <input type="password" v-model.trim="password" placeholder="Password" class="form-control">
+      </div>
+      <div class="col-sm-4">
+        <button class="btn btn-primary btn-small" @click="join()">
+          <i class="material-icons right">done</i>
+          Join
+        </button>
+      </div>
+    </div>
+  </main>
+  <footer class="page-footer">
+  </footer>
   </div>
 </template>
 
 <script>
+//Vue.component('message', {
+//  props: ['email', 'username', 'message'],
+//  template: '<div class="d-flex align-items-end">' +
+//  '<img v-bind:src="imgSrc" class="rounded-circle img-fluid m-1">' +
+//  '<div class="flex-1-auto mw-100">' +
+//  '<div class="mw-75 p-2 rounded bg-primary text-white">{{displayMessage}}</div>' +
+//  '<div class="text-muted">{{username}}</div>' +
+//  '</div>' +
+//  '</div>',
+//  computed: {
+//    imgSrc: function () {
+//      return 'http://www.gravatar.com/avatar/' + CryptoJS.MD5(this.email);
+//    },
+//    displayMessage: function () {
+//      return emojione.toImage(this.message);
+//    }
+//  }
+//});
+
 export default {
   name: 'app',
-  data () {
+  data: function () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      ws: null, // Our websocket
+      newMsg: '', // Holds new messages to be sent to the server
+      messages: [], // A running list of chat messages displayed on the screen
+      mobilenumber: null,
+      username: null,
+      firstname: null,
+      lastname: null,
+      email: null,
+      title: null,
+      password: null,
+      joined: false // True if email and username have been filled in
+    }
+  },
+
+  created: function () {
+    var self = this;
+    this.ws = new WebSocket('ws://' + window.location.host + '/ws');
+    this.ws.addEventListener('message', function (e) {
+      var msg = JSON.parse(e.data);
+      self.messages.push(msg);
+
+      var element = document.getElementById('chat-messages');
+      element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+    });
+  },
+
+  methods: {
+    send: function () {
+      if (this.newMsg != '') {
+        this.ws.send(
+          JSON.stringify({
+            email: this.mobilenumber,
+            username: this.username,
+            message: $('<p>').html(this.newMsg).text() // Strip out html
+          })
+        );
+        this.newMsg = ''; // Reset newMsg
+      }
+    },
+    join: function () {
+      if (!this.mobilenumber) {
+        Materialize.toast('You must enter an mobilenumber', 2000);  //TODO Materialize isn't a thing - this is broken
+        return
+      }
+      if (!this.username) {
+        Materialize.toast('You must choose a username', 2000);
+        return
+      }
+      const mobile = this.mobilenumber;
+      const email = this.email;
+      const firstname = this.firstname;
+      const lastname = this.lastname;
+      const title = this.title;
+      const password = this.password;
+      const username = this.username;
+      this.joined = true;
+
+      var req = new XMLHttpRequest();
+      req.open('POST', '/register/', true);
+      req.withCredentials = true;
+      req.onload = function () {
+        var data = JSON.parse(req.responseText);
+        //debug here. just firing and forgetting.
+      };
+      setTimeout(function () {
+        req.send(JSON.stringify({
+          Firstname: firstname,
+          Lastname: lastname,
+          Username: username,
+          Email: email,
+          MobileNumber: mobile,
+          Title: title,
+          Password: password
+        }));
+      })
     }
   }
 }
 </script>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
-</style>
