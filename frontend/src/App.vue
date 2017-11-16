@@ -60,6 +60,7 @@
 
 <script>
   import Message from './components/Message.vue';
+
   export default {
     name: 'app',
     components: {
@@ -85,13 +86,14 @@
       var self = this;
       this.ws = new WebSocket('ws://' + window.location.host + '/ws');
       this.ws.addEventListener('message', function (e) {
-        var msg = JSON.parse(e.data);
-        console.log(msg);
-        self.messages.push(msg);
-        console.log(self.messages);
-
-        var element = document.getElementById('chat-messages');
-        element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+        var data = JSON.parse(e.data);
+        var msg = data.contents;
+        console.log(e);
+        if (data.type === 1) {
+          self.messages.push(msg);
+          var element = document.getElementById('chat-messages');
+          element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+        }
       });
     },
 
@@ -102,7 +104,8 @@
             JSON.stringify({
               type: 0,
               contents: {
-                email: this.mobilenumber,
+                email: this.email,
+                mobilenumber: this.mobilenumber,
                 username: this.username,
                 message: $('<p>').html(this.newMsg).text() // Strip out html
               }
