@@ -1,5 +1,5 @@
 FROM node:8.6
-EXPOSE 8080 8080
+EXPOSE 8080
 
 WORKDIR /app
 ADD package.json package.json
