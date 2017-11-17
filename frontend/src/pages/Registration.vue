@@ -71,7 +71,9 @@
         req.withCredentials = true;
         req.onload = function () {
           var data = JSON.parse(req.responseText);
-          self.$router.push('/');
+          if (req.status === 200) {
+            self.$router.push('/login');
+          }
           //debug here. just firing and forgetting.
         };
         setTimeout(function () {
