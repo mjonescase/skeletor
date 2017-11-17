@@ -10,9 +10,10 @@
           <label>Password</label>
           <input v-model="passphrase" type='password' ref='passphrase' defaultValue="" class="form-control">
         </form-group>
-        <button class='btn btn-primary' v-on:click="saveForm">
+        <button class='btn btn-primary btn-block' v-on:click="saveForm">
           Login
         </button>
+        <router-link to="register" class="btn btn-secondary btn-block">Register</router-link>
       </div>
   </div>
 </template>
@@ -43,7 +44,7 @@
             var data = JSON.parse(req.responseText);
             localStorage.setItem('user', req.responseText);
             if (req.status === 200) {
-              self.$router.push('/');
+              self.$router.push('/chat');
             }
           }
 

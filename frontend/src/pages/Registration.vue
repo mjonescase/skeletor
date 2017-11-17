@@ -97,7 +97,7 @@
         req.onload = function () {
           var data = JSON.parse(req.responseText);
           if (req.status === 200) {
-            self.$router.push('/login');
+            self.$router.push('/');
           }
           //debug here. just firing and forgetting.
         };
