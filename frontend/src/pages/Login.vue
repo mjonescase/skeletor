@@ -1,14 +1,14 @@
 <template>
   <div class='d-flex justify-content-center align-items-center'>
       <div class='form'>
-        <div class='form-group'>
+        <form-group>
           <label>Username</label>
           <input v-model="username" type='text' ref='username' defaultValue="" class="form-control">
-        </div>
-        <div class='form-group'>
+        </form-group>
+        <form-group>
           <label>Password</label>
           <input v-model="passphrase" type='password' ref='passphrase' defaultValue="" class="form-control">
-        </div>
+        </form-group>
         <button class='btn btn-primary' v-on:click="saveForm">
           Login
         </button>
@@ -17,12 +17,16 @@
 </template>
 
 <script type="text/javascript">
+  import FormGroup from '../components/FormGroup.vue';
   export default {
     data() {
       return {
         username: '',
         passphrase: '',
       };
+    },
+    components: {
+      FormGroup
     },
     methods: {
       saveForm() {

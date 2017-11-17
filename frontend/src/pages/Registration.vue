@@ -3,25 +3,50 @@
     <h1 class="text-center">Register</h1>
     <div class="row">
       <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="text" v-model.trim="mobilenumber" placeholder="Mobile Number" class="form-control">
+        <form-group>
+          <label>Username</label>
+          <input type="text" v-model.trim="username" placeholder="username" class="form-control">
+        </form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="ml-sm-auto col-sm-4 mb-1">
+        <form-group>
+          <label>First Name</label>
+          <input type="text" v-model.trim="firstname" placeholder="First Name" class="form-control">
+        </form-group>
+      </div>
+      <div class="mr-sm-auto col-sm-4 mb-1">
+        <form-group>
+          <label>Last Name</label>
+          <input type="text" v-model.trim="lastname" placeholder="Last Name" class="form-control">
+        </form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="mx-sm-auto col-sm-8 mb-1">
+        <form-group>
+          <label>Email</label>
+          <input type="text" v-model.trim="email" placeholder="youremail@provider.com" class="form-control">
+        </form-group>
       </div>
       <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="text" v-model.trim="username" placeholder="Username" class="form-control">
+        <form-group>
+          <label>Mobile Number</label>
+          <input type="text" v-model.trim="mobilenumber" placeholder="###-###-####" class="form-control">
+        </form-group>
       </div>
       <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="text" v-model.trim="firstname" placeholder="First Name" class="form-control">
+        <form-group>
+          <label>Title</label>
+          <input type="text" v-model.trim="title" placeholder="CNA" class="form-control">
+        </form-group>
       </div>
       <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="text" v-model.trim="lastname" placeholder="Last Name" class="form-control">
-      </div>
-      <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="text" v-model.trim="email" placeholder="me@you.com" class="form-control">
-      </div>
-      <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="text" v-model.trim="title" placeholder="Title (ex: CNA)" class="form-control">
-      </div>
-      <div class="mx-sm-auto col-sm-8 mb-1">
-        <input type="password" v-model.trim="password" placeholder="Password" class="form-control">
+        <form-group>
+          <label>Password</label>
+          <input type="password" v-model.trim="password" class="form-control">
+        </form-group>
       </div>
       <div class="mx-sm-auto col-sm-8 mb-1">
         <button class="btn btn-primary" @click="join()">

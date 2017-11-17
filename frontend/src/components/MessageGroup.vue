@@ -18,7 +18,6 @@
     components: { Message },
     computed: {
       imgSrc: function () {
-        console.log(this, this.message);
         if (this.message && this.message.email)
           return 'http://www.gravatar.com/avatar/' + md5(this.message.email);
         return '';
