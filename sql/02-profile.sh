@@ -12,4 +12,6 @@ CREATE TABLE profile (
         password varchar(255),
         mobilenumber varchar(255)
 );
+
+ALTER TABLE profile ADD CONSTRAINT profile_email_unique UNIQUE (email)
 EOSQL

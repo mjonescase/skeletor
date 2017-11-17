@@ -213,6 +213,14 @@ func (p *Prox) parseWhiteList(r *http.Request) bool {
 	return false
 }
 
+func handleProfilesRequest(w http.ResponseWriter, r *http.Request) {
+	// need to return all the users.
+	users := getAllUsers()
+
+	//how do I return them?
+	utils.MustEncode(w, users)
+}
+
 func main() {
 	initConfig()
 	initDb()
@@ -224,6 +232,7 @@ func main() {
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
 	http.HandleFunc("/login/", handleLogin)
+	http.HandleFunc("/profiles/", handleProfilesRequest)
 
 	// Start listening for incoming chat messages
 	go handleMessages()
