@@ -50,9 +50,9 @@ func queryUserCredential(profile *Profile) bool {
 		&profile.MobileNumber)
 	switch {
 	case err == sql.ErrNoRows:
-		log.Printf("No user with that ID.")
+		return result
 	case err != nil:
-		log.Fatal(err)
+		return result
 	default:
 		result = true
 	}

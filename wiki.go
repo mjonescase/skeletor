@@ -10,10 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	_ "net/http/pprof"
-	"net/url"
-	"regexp"
 	"skeletor/utils"
 	"time"
 )
@@ -35,29 +32,6 @@ const (
 	PUBTYPE_MESSAGE  = iota // 0
 	PUBTYPE_CONTACTS = iota // 1
 )
-
-// define our message object
-type Message struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Message  string `json:"message"`
-}
-
-type Profile struct {
-	Id           string `json:"id"`
-	Firstname    string `json:"firstname"`
-	Lastname     string `json:"lastname"`
-	Username     string `json:"username"`
-	Email        string `json:"email"`
-	Title        string `json:"title"`
-	Password     string `json:",omitempty"`
-	MobileNumber string `json:"mobilenumber"`
-}
-
-type PublishedContent struct {
-	Type     int         `json:"type"` // either PUBTYPE_MESSAGE or PUBTYPE_CONTACTS
-	Contents interface{} `json:"contents"`
-}
 
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
 	ws, err := upgrader.Upgrade(writer, request, nil)
@@ -93,6 +67,13 @@ func validateLogin(req *Profile) bool {
 	return result
 }
 
+func generateSessionFromProfile(request Profile) http.Cookie {
+	sessionInfo := fmt.Sprintf("{'username': '%s', 'id': '%s', 'email': '%s'}", request.Username, request.Id, request.Email)
+	expire := time.Now().AddDate(0, 0, 1)
+	cookie := http.Cookie{"SessionInfo", sessionInfo, "/", config["hostname"], expire, expire.Format(time.UnixDate), 86400, true, false, "", []string{""}}
+	return cookie
+}
+
 func handleLogin(rw http.ResponseWriter, req *http.Request) {
 	request := Profile{}
 
@@ -106,9 +87,7 @@ func handleLogin(rw http.ResponseWriter, req *http.Request) {
 
 	authenticated := validateLogin(&request)
 	if authenticated {
-		sessionInfo := fmt.Sprintf("{'username': '%s', 'id': '%s', 'email': '%s'}", request.Username, request.Id, request.Email)
-		expire := time.Now().AddDate(0, 0, 1)
-		cookie := http.Cookie{"SessionInfo", sessionInfo, "/", config["hostname"], expire, expire.Format(time.UnixDate), 86400, true, false, "", []string{""}}
+		cookie := generateSessionFromProfile(request)
 		http.SetCookie(rw, &cookie)
 		rw.WriteHeader(http.StatusOK)
 	} else {
@@ -153,6 +132,7 @@ func handleMessages() {
 		}
 	}
 }
+
 func initDb() {
 	var err error
 	session, err = sql.Open(
@@ -178,57 +158,16 @@ func initConfig() {
 	}
 }
 
-type Prox struct {
-	target        *url.URL
-	proxy         *httputil.ReverseProxy
-	routePatterns []*regexp.Regexp // add some route patterns with regexp
-}
-
-func New(target string) *Prox {
-	url, err := url.Parse(target)
-
-	if err != nil {
-		panic(err)
-	}
-	return &Prox{target: url, proxy: httputil.NewSingleHostReverseProxy(url)}
-}
-
-func (p *Prox) handle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-GoProxy", "GoProxy")
-
-	if p.routePatterns == nil || p.parseWhiteList(r) {
-		p.proxy.ServeHTTP(w, r)
-	}
-}
-
-func (p *Prox) parseWhiteList(r *http.Request) bool {
-	for _, regexp := range p.routePatterns {
-		fmt.Println(r.URL.Path)
-		if regexp.MatchString(r.URL.Path) {
-			// let's forward it
-			return true
-		}
-	}
-	fmt.Println("Not accepted routes %x", r.URL.Path)
-	return false
-}
-
-func handleProfilesRequest(w http.ResponseWriter, r *http.Request) {
-	// need to return all the users.
-	users := getAllUsers()
-
-	//how do I return them?
-	utils.MustEncode(w, users)
-}
-
 func main() {
 	initConfig()
 	initDb()
 
 	// Create a simple file server
-	proxy := New("http://frontend:8080")
-	//fs := http.FileServer(http.Dir("./public"))
-	http.HandleFunc("/", proxy.handle)
+	//proxy := New("http://0.0.0.0:8080")
+	//http.HandleFunc("/", proxy.handle)
+
+	fs := http.FileServer(http.Dir("./public"))
+	http.Handle("/", fs)
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
 	http.HandleFunc("/login/", handleLogin)
