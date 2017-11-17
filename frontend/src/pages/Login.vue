@@ -1,6 +1,7 @@
 <template>
   <div class='d-flex justify-content-center align-items-center'>
       <div class='form'>
+        <h1>Login</h1>
         <form-group>
           <label>Username</label>
           <input v-model="username" type='text' ref='username' defaultValue="" class="form-control">
