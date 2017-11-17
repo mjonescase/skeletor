@@ -58,7 +58,10 @@
 </template>
 
 <script>
+  import FormGroup from '../components/FormGroup.vue';
+
   export default {
+    components: { FormGroup },
     data: function () {
       return {
         mobilenumber: null,
