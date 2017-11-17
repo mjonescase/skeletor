@@ -22,3 +22,6 @@ go tool pprof will analyze these profiles.
 
 
 
+### To run benchmarks
+go test -bench .
+
