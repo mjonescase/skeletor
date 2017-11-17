@@ -171,7 +171,7 @@ func main() {
 	initDb()
 
 	// Create a simple file server
-	proxy := New("http://0.0.0.0:8080")
+	proxy := New("http://frontend:8080")
 	http.HandleFunc("/", proxy.handle)
 
 	//fs := http.FileServer(http.Dir("./public"))
