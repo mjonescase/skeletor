@@ -133,6 +133,14 @@ func handleMessages() {
 	}
 }
 
+func handleProfilesRequest(w http.ResponseWriter, r *http.Request) {
+	// need to return all the users.
+	users := getAllUsers()
+
+	//how do I return them?
+	utils.MustEncode(w, users)
+}
+
 func initDb() {
 	var err error
 	session, err = sql.Open(
@@ -163,11 +171,11 @@ func main() {
 	initDb()
 
 	// Create a simple file server
-	//proxy := New("http://0.0.0.0:8080")
-	//http.HandleFunc("/", proxy.handle)
+	proxy := New("http://0.0.0.0:8080")
+	http.HandleFunc("/", proxy.handle)
 
-	fs := http.FileServer(http.Dir("./public"))
-	http.Handle("/", fs)
+	//fs := http.FileServer(http.Dir("./public"))
+	//http.Handle("/", fs)
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
 	http.HandleFunc("/login/", handleLogin)

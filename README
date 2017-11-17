@@ -23,5 +23,7 @@ go tool pprof will analyze these profiles.
 
 
 ### To run benchmarks
-go test -bench .
+go test -bench . -benchmem -cpuprofile prof.cpu
+
+go tool pprof stats.test prof.cpu
 
