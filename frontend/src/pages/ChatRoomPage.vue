@@ -5,8 +5,8 @@
         <div class="col-sm-8">
           <div class="card mb-1 mt-1 flex-1-auto">
             <div id="chat-messages" class="card-content p-1">
-              <message v-for="msg in messages"
-                       v-bind:message="msg"></message>
+              <message-group v-for="msg in groupedMessages"
+                       v-bind:message="msg"></message-group>
             </div>
           </div>
         </div>
@@ -34,13 +34,13 @@
 </template>
 
 <script>
-  import Message from '../components/Message.vue';
+  import MessageGroup from '../components/MessageGroup.vue';
   import Contact from '../components/Contact.vue';
 
   export default {
     name: 'chatRoomPage',
     components: {
-      Message,
+      MessageGroup,
       Contact
     },
     data: function () {
@@ -88,6 +88,24 @@
           );
           this.newMsg = ''; // Reset newMsg
         }
+      }
+    },
+    computed: {
+      groupedMessages: function() {
+        return this.messages.reduce(function(grouped, message) {
+          if (grouped.length && grouped[grouped.length-1].username === message.username) {
+            var userMessage = grouped.pop();
+            grouped.push({
+              ...userMessage,
+              messages: userMessage.messages.concat(message.message)
+            });
+          }
+          else {
+            message.messages = [message.message];
+            grouped.push(message);
+          }
+          return grouped;
+        }, []);
       }
     }
   }
