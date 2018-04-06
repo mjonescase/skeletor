@@ -50,7 +50,7 @@
 
     created: function () {
       var self = this;
-      this.ws = new WebSocket('ws://' + window.location.host + '/ws');
+      this.ws = new WebSocket('ws://' + window.location.host + '/ws?room=commBlue');
       this.ws.addEventListener('message', function (e) {
         var data = JSON.parse(e.data);
         var msg = data.contents;

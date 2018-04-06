@@ -12,12 +12,12 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"skeletor/utils"
+	"strings"
 	"time"
 )
 
 var (
-	clients              = make(map[*websocket.Conn]bool) // connected clients
-	broadcast            = make(chan PublishedContent)    // broadcast channel
+	rooms                = map[string]Room{}
 	upgrader             = websocket.Upgrader{}           // configure the upgrader
 	config               = map[string]string{}
 	configFile   *string = flag.String("config", "config", "Path to config file")
@@ -27,37 +27,30 @@ var (
 	hashSalt             = ""
 )
 
+// room names
+const (
+	COMM_BLUE     = "commBlue"
+	COMM_GREEN    = "commGreen"
+	COMM_RED      = "commRed"
+	LOCATION_BLUE = "locationBlue"
+	LOCATION_RED  = "locationRed"
+)
+
 // published content type enum
 const (
-	PUBTYPE_MESSAGE  = iota // 0
-	PUBTYPE_CONTACTS = iota // 1
+	PUBTYPE_MESSAGE  = iota
+	PUBTYPE_CONTACTS = iota
 )
 
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
+	room := rooms[strings.Split(request.URL.RawQuery, "=")[1]]
 	ws, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Make sure we close the connection when the function returns
-	defer ws.Close()
-
-	// Register our new client
-	clients[ws] = true
-
-	for {
-		var msg PublishedContent
-		// Read in a new message as JSON and map it to a Message object
-		err := ws.ReadJSON(&msg)
-		if err != nil {
-			log.Printf("error: %v", err)
-			delete(clients, ws)
-			break
-		}
-
-		// Send the newly received message to the broadcast channel
-		broadcast <- msg
-	}
+	// call addConnection
+	registerClient(ws, room)
+	serveForever(ws, room)
 }
 
 func validateLogin(req *Profile) bool {
@@ -96,11 +89,12 @@ func handleLogin(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
+	rooms[COMM_BLUE].Broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
 	utils.MustEncode(rw, request)
 }
 
 func handleRegistration(rw http.ResponseWriter, req *http.Request) {
+	log.Println("got a registration request")
 	request := Profile{}
 
 	decoder := json.NewDecoder(req.Body)
@@ -113,24 +107,8 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 
 	saveUserProfile(&request)
 	// broadcast the new user
-	broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
+	rooms[COMM_BLUE].Broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
 	utils.MustEncode(rw, request)
-}
-
-func handleMessages() {
-	for {
-		// Grab the next message from the broadcast channel
-		msg := <-broadcast
-		// Send it out to every client that is currently connected
-		for client := range clients {
-			err := client.WriteJSON(msg)
-			if err != nil {
-				log.Printf("error: %v", err)
-				client.Close()
-				delete(clients, client)
-			}
-		}
-	}
 }
 
 func handleProfilesRequest(w http.ResponseWriter, r *http.Request) {
@@ -166,6 +144,17 @@ func initConfig() {
 	}
 }
 
+func initRooms() {
+	rooms [COMM_BLUE]     = Room{}
+	rooms [COMM_GREEN]    = Room{}
+	rooms [COMM_RED]      = Room{}
+	rooms [LOCATION_BLUE] = Room{}
+	rooms [LOCATION_RED]  = Room{}
+	for  _, room := range rooms {
+		go handleMessages(room)
+	}
+}
+
 func main() {
 	initConfig()
 	initDb()
@@ -182,7 +171,7 @@ func main() {
 	http.HandleFunc("/profiles/", handleProfilesRequest)
 
 	// Start listening for incoming chat messages
-	go handleMessages()
+	initRooms()
 
 	// Start the server on localhost port 5000 and log any errors
 	log.Println("http server started on :5000")
