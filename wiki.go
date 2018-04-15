@@ -36,19 +36,16 @@ const (
 	LOCATION_RED  = "locationRed"
 )
 
-// published content type enum
-const (
-	PUBTYPE_MESSAGE  = iota
-	PUBTYPE_CONTACTS = iota
-)
-
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
+	fmt.Sprintf("Got a request to join room %s", request.URL.RawQuery)
 	room := rooms[strings.Split(request.URL.RawQuery, "=")[1]]
+	fmt.Sprintf("Got a request to join room %s", room)
 	ws, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// call addConnection
+	fmt.Sprintf("registering client to room")
 	registerClient(ws, room)
 	serveForever(ws, room)
 }
@@ -89,7 +86,6 @@ func handleLogin(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rooms[COMM_BLUE].Broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
 	utils.MustEncode(rw, request)
 }
 
@@ -106,17 +102,7 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	saveUserProfile(&request)
-	// broadcast the new user
-	rooms[COMM_BLUE].Broadcast <- PublishedContent{Type: PUBTYPE_CONTACTS, Contents: getAllUsers()}
 	utils.MustEncode(rw, request)
-}
-
-func handleProfilesRequest(w http.ResponseWriter, r *http.Request) {
-	// need to return all the users.
-	users := getAllUsers()
-
-	//how do I return them?
-	utils.MustEncode(w, users)
 }
 
 func initDb() {
@@ -145,11 +131,11 @@ func initConfig() {
 }
 
 func initRooms() {
-	rooms [COMM_BLUE]     = Room{}
-	rooms [COMM_GREEN]    = Room{}
-	rooms [COMM_RED]      = Room{}
-	rooms [LOCATION_BLUE] = Room{}
-	rooms [LOCATION_RED]  = Room{}
+	rooms [COMM_BLUE]     = buildRoom()
+	rooms [COMM_GREEN]    = buildRoom()
+	rooms [COMM_RED]      = buildRoom()
+	rooms [LOCATION_BLUE] = buildRoom()
+	rooms [LOCATION_RED]  = buildRoom()
 	for  _, room := range rooms {
 		go handleMessages(room)
 	}
@@ -168,7 +154,6 @@ func main() {
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
 	http.HandleFunc("/login/", handleLogin)
-	http.HandleFunc("/profiles/", handleProfilesRequest)
 
 	// Start listening for incoming chat messages
 	initRooms()
