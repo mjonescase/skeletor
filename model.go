@@ -27,8 +27,9 @@ type Profile struct {
 }
 
 type PublishedContent struct {
-	Type     int         `json:"type"` // either PUBTYPE_MESSAGE or PUBTYPE_CONTACTS
-	Contents interface{} `json:"contents"`
+	Username  string  `json:"username"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 type Prox struct {

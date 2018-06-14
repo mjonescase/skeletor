@@ -1,10 +1,10 @@
 hash: 477657827d66523269b5e740550e8e2c19a31abad68201eaf0a1baf12a8d1527
-updated: 2018-04-06T12:14:59.4280986Z
+updated: 2018-06-11T01:33:04.4123581Z
 imports:
 - name: github.com/gorilla/websocket
-  version: eb925808374e5ca90c83401a40d711dc08c0c0f6
+  version: 5ed622c449da6d44c3c8329331ff47a9e5844f71
 - name: github.com/lib/pq
-  version: d34b9ff171c21ad295489235aec8b6626023cd04
+  version: 90697d60dd844d5ef6ff15135d0203f65d2f53b8
   subpackages:
   - oid
 testImports: []

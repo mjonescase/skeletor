@@ -37,6 +37,7 @@ func serveForever(connection *websocket.Conn, room Room) {
 		}
 
 		// Send the newly received message to the broadcast channel
+		log.Printf("Got a new message from username %s latitude: %f longitude: %f", msg.Username, msg.Latitude, msg.Longitude)
 		room.Broadcast <- msg
 	}
 }
@@ -45,6 +46,7 @@ func handleMessages(room Room) {
 	for {
 		// Grab the next message from the broadcast channel
 		msg := <- room.Broadcast
+		log.Printf("got a message: %s", msg)
 		// Send it out to every client that is currently connected
 		for client := range room.Clients {
 			err := client.WriteJSON(msg)
