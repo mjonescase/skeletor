@@ -143,7 +143,7 @@ func initRooms() {
 
 func main() {
 	initConfig()
-	initDb()
+	// initDb()
 
 	// Create a simple file server
 	proxy := New("http://frontend:8080")
