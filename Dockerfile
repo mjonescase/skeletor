@@ -13,5 +13,7 @@ RUN mkdir -p $$GOPATH/bin && \
 ADD . /go/src/skeletor
 WORKDIR /go/src/skeletor
 
+EXPOSE 5000
+
 # serve the app
 CMD glide update && fresh -c ./runner.conf ./wiki.go

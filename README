@@ -1,0 +1,66 @@
+Go has really good profiling tools built into the standard library.
+
+cpu profiling - stack sampling
+heap profiling - small amount of allocations are sampled including call stack
+block profiling - lock contentions
+
+tracing, etc all in pprof
+
+Ways to profile:
+1. Instrument your binary during testing and benchmarking:
+go test -cpuprofile -memprofile
+
+2. import _ net/http/pprof that exposes /debug/pprof endpoints to your app
+        - Once those are enabled a simple command will take a sample:
+          go tool pprof -seconds 5 http://localhost:5000/debug/pprof/profile
+
+3. for debugging memory leaks or something really difficult, you can
+instrument things in your application where you think the issue is. 
+        runtime.StartCPUProfile or runtime.WriteHeapProfile
+
+go tool pprof will analyze these profiles.
+
+
+
+### To run benchmarks
+go test -bench . -benchmem -cpuprofile prof.cpu
+
+go tool pprof stats.test prof.cpu
+
+Fetched 1 source profiles out of 2
+Main binary filename not available.
+Type: cpu
+Time: Nov 16, 2017 at 7:29pm (EST)
+Duration: 2.24s, Total samples = 2.04s (91.11%)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) list HashPassword
+Total: 2.04s
+ROUTINE ======================== skeletor.BenchmarkHashPassword in /Users/Bmercer/gopath/src/skeletor/skeletor_test.go
+      10ms      1.78s (flat, cum) 87.25% of Total
+         .          .      4:   "skeletor/utils"
+         .          .      5:   "testing"
+         .          .      6:)
+         .          .      7:
+         .          .      8:func BenchmarkHashPassword(b *testing.B) {
+      10ms       10ms      9:   for i := 0; i < b.N; i++ {
+         .      1.77s     10:           utils.HashPassword("password")
+         .          .     11:   }
+         .          .     12:
+         .          .     13:}
+ROUTINE ======================== skeletor/utils.HashPassword in /Users/Bmercer/gopath/src/skeletor/utils/utils.go
+      70ms      1.77s (flat, cum) 86.76% of Total
+         .          .      7:   "io"
+         .          .      8:   "net/http"
+         .          .      9:)
+         .          .     10:
+         .          .     11:func HashPassword(password string) string {
+         .      250ms     12:   h := sha256.New()
+      20ms      110ms     13:   h.Write([]byte(password))
+      40ms      1.40s     14:   res := fmt.Sprintf("%x", h.Sum(nil))
+      10ms       10ms     15:   return res
+         .          .     16:}
+         .          .     17:
+         .          .     18:func MustEncode(w io.Writer, i interface{}) {
+         .          .     19:   if headered, ok := w.(http.ResponseWriter); ok {
+         .          .     20:           headered.Header().Set("Cache-Control", "no-cache")
+

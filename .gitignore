@@ -1,2 +1,5 @@
 *~
 tmp/
+vendor/
+.idea
+passcodes.go

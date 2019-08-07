@@ -4,69 +4,94 @@ import (
 	"database/sql"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"skeletor/utils"
+	"strings"
+	"time"
 )
 
 var (
-	clients              = make(map[*websocket.Conn]bool) // connected clients
-	broadcast            = make(chan Message)             // broadcast channel
+	rooms                = map[string]Room{}
 	upgrader             = websocket.Upgrader{}           // configure the upgrader
 	config               = map[string]string{}
 	configFile   *string = flag.String("config", "config", "Path to config file")
 	DefaultError         = map[string]string{"ErrorReason": "You sent in a request with invalid json"}
+	AuthError            = map[string]string{"ErrorReason": "You are not authorized to perform this action"}
 	session              = &sql.DB{}
+	hashSalt             = ""
 )
 
-// define our message object
-type Message struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Message  string `json:"message"`
-}
+// room names
+const (
+	COMM_BLUE     = "commBlue"
+	COMM_GREEN    = "commGreen"
+	COMM_RED      = "commRed"
+	LOCATION_BLUE = "locationBlue"
+	LOCATION_RED  = "locationRed"
+)
 
-type Profile struct {
-	Id           string `json:"id"`
-	Firstname    string `json:"firstname"`
-	Lastname     string `json:"lastname"`
-	Username     string `json:"username"`
-	Title        string `json:"title"`
-	Password     string `json:"-"`
-	MobileNumber string `json:"mobile"`
-}
 
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
+	roomName := passcodesToRooms[strings.Split(request.URL.RawQuery, "=")[1]]
+	room := rooms[roomName]
+	
 	ws, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// call addConnection
+	fmt.Sprintf("registering client to room")
+	registerClient(ws, room)
+	serveForever(ws, room)
+}
 
-	// Make sure we close the connection when the function returns
-	defer ws.Close()
+func validateLogin(req *Profile) bool {
+	result := false
+	req.Password = utils.HashPassword(req.Password)
+	result = queryUserCredential(req)
+	return result
+}
 
-	// Register our new client
-	clients[ws] = true
+func generateSessionFromProfile(request Profile) http.Cookie {
+	sessionInfo := fmt.Sprintf("{'username': '%s', 'id': '%s', 'email': '%s'}", request.Username, request.Id, request.Email)
+	expire := time.Now().AddDate(0, 0, 1)
+	cookie := http.Cookie{"SessionInfo", sessionInfo, "/", config["hostname"], expire, expire.Format(time.UnixDate), 86400, true, false, "", []string{""}}
+	return cookie
+}
 
-	for {
-		var msg Message
-		// Read in a new message as JSON and map it to a Message object
-		err := ws.ReadJSON(&msg)
-		if err != nil {
-			log.Printf("error: %v", err)
-			delete(clients, ws)
-			break
-		}
+func handleLogin(rw http.ResponseWriter, req *http.Request) {
+	request := Profile{}
 
-		// Send the newly received message to the broadcast channel
-		broadcast <- msg
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&request)
+
+	if err != nil {
+		utils.MustEncode(rw, AuthError)
+		return
 	}
+
+	authenticated := validateLogin(&request)
+	if authenticated {
+		cookie := generateSessionFromProfile(request)
+		http.SetCookie(rw, &cookie)
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		rw.WriteHeader(http.StatusUnauthorized)
+		utils.MustEncode(rw, AuthError)
+		return
+	}
+
+	utils.MustEncode(rw, request)
 }
 
 func handleRegistration(rw http.ResponseWriter, req *http.Request) {
+	log.Println("got a registration request")
 	request := Profile{}
 
 	decoder := json.NewDecoder(req.Body)
@@ -81,28 +106,13 @@ func handleRegistration(rw http.ResponseWriter, req *http.Request) {
 	utils.MustEncode(rw, request)
 }
 
-func handleMessages() {
-	for {
-		// Grab the next message from the broadcast channel
-		msg := <-broadcast
-		// Send it out to every client that is currently connected
-		for client := range clients {
-			err := client.WriteJSON(msg)
-			if err != nil {
-				log.Printf("error: %v", err)
-				client.Close()
-				delete(clients, client)
-			}
-		}
-	}
-}
 func initDb() {
 	var err error
 	session, err = sql.Open(
 		"postgres", "host="+config["dbhost"]+
-			"user="+config["dbuser"]+
-			"dbname="+config["dbname"]+
-			"sslmode="+config["dbsslmode"])
+			" user="+config["dbuser"]+
+			" dbname="+config["dbname"]+
+			" sslmode="+config["sslmode"])
 
 	if err != nil {
 		panic(err)
@@ -121,18 +131,33 @@ func initConfig() {
 	}
 }
 
+func initRooms() {
+	rooms [COMM_BLUE]     = buildRoom()
+	rooms [COMM_GREEN]    = buildRoom()
+	rooms [COMM_RED]      = buildRoom()
+	rooms [LOCATION_BLUE] = buildRoom()
+	rooms [LOCATION_RED]  = buildRoom()
+	for  _, room := range rooms {
+		go handleMessages(room)
+	}
+}
+
 func main() {
 	initConfig()
-	initDb()
+	// initDb()
 
 	// Create a simple file server
-	fs := http.FileServer(http.Dir("./public"))
-	http.Handle("/", fs)
+	proxy := New("http://frontend:8080")
+	http.HandleFunc("/", proxy.handle)
+
+	//fs := http.FileServer(http.Dir("./public"))
+	//http.Handle("/", fs)
 	http.HandleFunc("/ws", handleConnections)
 	http.HandleFunc("/register/", handleRegistration)
+	http.HandleFunc("/login/", handleLogin)
 
 	// Start listening for incoming chat messages
-	go handleMessages()
+	initRooms()
 
 	// Start the server on localhost port 5000 and log any errors
 	log.Println("http server started on :5000")

@@ -20,12 +20,11 @@
 </header>
 <main id="app" class="container-fluid d-flex flex-column">
     <div class="card mb-1 mt-1 flex-1-auto">
-        <div id="chat-messages" class="card-content">
-            <div class="d-flex" v-for="msg in messages">
-                <img v-bind:src="gravatarURL(msg.email)">
-                {{msg.username}}
-                {{msg.message}}
-            </div>
+        <div id="chat-messages" class="card-content p-1">
+            <message v-for="msg in messages"
+                    v-bind:message="msg.message"
+                    v-bind:username="msg.username"
+                    v-bind:email="msg.email">
         </div>
     </div>
     <div class="row d-flex flex-row flex-wrap" v-if="joined">
@@ -41,10 +40,25 @@
     </div>
     <div class="row d-flex flex-row flex-wrap" v-if="!joined">
         <div class="col-sm-8 mb-1">
-            <input type="email" v-model.trim="email" placeholder="Email" class="form-control">
+            <input type="text" v-model.trim="mobilenumber" placeholder="Mobile Number" class="form-control">
         </div>
         <div class="col-sm-8 mb-1">
             <input type="text" v-model.trim="username" placeholder="Username" class="form-control">
+        </div>
+        <div class="col-sm-8 mb-1">
+            <input type="text" v-model.trim="firstname" placeholder="First Name" class="form-control">
+        </div>
+        <div class="col-sm-8 mb-1">
+            <input type="text" v-model.trim="lastname" placeholder="Last Name" class="form-control">
+        </div>
+        <div class="col-sm-8 mb-1">
+            <input type="text" v-model.trim="email" placeholder="me@you.com" class="form-control">
+        </div>
+        <div class="col-sm-8 mb-1">
+            <input type="text" v-model.trim="title" placeholder="Title (ex: CNA)" class="form-control">
+        </div>
+        <div class="col-sm-8 mb-1">
+            <input type="password" v-model.trim="password" placeholder="Password" class="form-control">
         </div>
         <div class="col-sm-4">
             <button class="btn btn-primary btn-small" @click="join()">

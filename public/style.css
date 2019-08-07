@@ -11,10 +11,6 @@ main {
 .flex-1-auto {
     flex: 1 1 auto;
 }
-
-#chat-messages {
-    min-height: 10vh;
-    height: 60vh;
-    width: 100%;
-    overflow-y: scroll;
+.mw-75 {
+    max-width: 75%;
 }
