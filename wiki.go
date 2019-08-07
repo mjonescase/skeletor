@@ -36,10 +36,11 @@ const (
 	LOCATION_RED  = "locationRed"
 )
 
+
 func handleConnections(writer http.ResponseWriter, request *http.Request) {
-	fmt.Sprintf("Got a request to join room %s", request.URL.RawQuery)
-	room := rooms[strings.Split(request.URL.RawQuery, "=")[1]]
-	fmt.Sprintf("Got a request to join room %s", room)
+	roomName := passcodesToRooms[strings.Split(request.URL.RawQuery, "=")[1]]
+	room := rooms[roomName]
+	
 	ws, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		log.Fatal(err)
