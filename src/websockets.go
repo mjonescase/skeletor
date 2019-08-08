@@ -46,7 +46,7 @@ func handleMessages(room Room) {
 	for {
 		// Grab the next message from the broadcast channel
 		msg := <- room.Broadcast
-		log.Printf("got a message: %s", msg)
+		log.Printf("got a message from: %s", msg.Username)
 		// Send it out to every client that is currently connected
 		for client := range room.Clients {
 			err := client.WriteJSON(msg)

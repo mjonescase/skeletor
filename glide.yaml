@@ -1,9 +1,0 @@
-package: github.com/mjonescase/skeletor
-homepage: https://github.com/mjonescase/skeletor
-license: MIT
-owners:
- - name: Mike Jones
- - email: mwj12@case.edu
- - homepage: https://github.com/mjonescase
-import:
- - package: github.com/gorilla/websocket
