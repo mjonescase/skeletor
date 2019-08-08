@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	_ "net/http/pprof"

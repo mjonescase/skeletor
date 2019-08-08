@@ -7,4 +7,3 @@ owners:
  - homepage: https://github.com/mjonescase
 import:
  - package: github.com/gorilla/websocket
- - package: github.com/lib/pq

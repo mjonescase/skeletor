@@ -10,7 +10,10 @@ RUN mkdir -p $$GOPATH/bin && \
     go get github.com/pilu/fresh
 
 # define work directory
-ADD . /go/src/skeletor
+ADD src/ /go/src/skeletor
+ADD runner.conf /go/src/skeletor
+ADD glide.yaml /go/src/skeletor
+ADD glide.lock /go/src/skeletor
 WORKDIR /go/src/skeletor
 
 EXPOSE 5000
