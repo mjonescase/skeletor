@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -18,7 +19,7 @@ type PublishedContent struct {
 	Message   string  `json: "message"`
 }
 
-func connect(u url.URL, username string) {
+func connect(u url.URL, username string, interval int) {
 	flag.Parse()
 	log.SetFlags(0)
 
@@ -48,12 +49,10 @@ func connect(u url.URL, username string) {
 		}
 	}()
 
-	if username != "" {
-		writeAtRegularIntervals(c, username, done)
-	}
+	writeAtRegularIntervals(c, username, done, interval)
 }
 
-func writeAtRegularIntervals(c *websocket.Conn,	username string, done chan struct{}) {
+func writeAtRegularIntervals(c *websocket.Conn,	username string, done chan struct{}, interval int) {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
@@ -65,16 +64,19 @@ func writeAtRegularIntervals(c *websocket.Conn,	username string, done chan struc
 		case <-done:
 			return
 		case t := <-ticker.C:
-			msg := PublishedContent {
-				Username: username,
-				Latitude: float64(t.Hour()),
-				Longitude: float64(t.Minute()),
-			}
-					
-			err := c.WriteJSON(msg)
-			if err != nil {
-				log.Println("write:", err)
-				return
+			seconds := t.Second()
+			if interval > 0 && seconds % interval == 0 {
+				msg := PublishedContent {
+					Username: username,
+						Latitude: float64(t.Minute()),
+						Longitude: float64(seconds),
+				}
+
+				err := c.WriteJSON(msg)
+				if err != nil {
+					log.Println("write:", err)
+					return
+				}
 			}
 		case <-interrupt:
 			log.Println("interrupt")
@@ -103,9 +105,15 @@ func main() {
 		RawQuery: "passcode=blue123",
 	}
 	args := os.Args[1:]
-	if len(args) > 0 {
-		connect(u, os.Args[len(os.Args) -1])
+	if len(args) > 1 {
+		username := args[len(args) - 2]
+		interval, err := strconv.Atoi(args[len(args) - 1])
+		if err != nil {
+			log.Println("Bad interval, must be int:", args[len(args) -1])
+			os.Exit(1)
+		}
+		connect(u, username, interval)
 	} else {
-		connect(u, "")
+		connect(u, "", -1)
 	}
 }
