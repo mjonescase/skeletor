@@ -1,0 +1,16 @@
+version: 2.1
+
+orbs:
+  go: circleci/go@0.2.0
+
+jobs:
+  test:
+    executor: go/default
+    steps:
+      - go/test
+  
+workflows:
+  build_lint_test:
+    jobs:
+      - test
+
