@@ -4,10 +4,6 @@ orbs:
   go: circleci/go@0.2.0
 
 jobs:
-  prepare:
-    executor: go/default
-    steps:
-      - checkout
   test:
     parameters:
       root:
@@ -26,14 +22,9 @@ jobs:
 workflows:
   build_lint_test:
     jobs:
-      - prepare
       - test:
           name: test_server
           root: server
-          requires:
-            - prepare
       - test:
           name: test_client
           root: client
-          requires:
-            - prepare
