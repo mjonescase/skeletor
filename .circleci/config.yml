@@ -18,8 +18,10 @@ jobs:
           - client
     executor: go/default
     steps:
-      - run: cd << parameters.root >>        
-      - go/test
+      - checkout
+      - run: |
+          cd << parameters.root >>
+          go test
   
 workflows:
   build_lint_test:
