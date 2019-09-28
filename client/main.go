@@ -45,7 +45,7 @@ func connect(u url.URL, username string, interval int) {
 				log.Println("read:", err)
 				return
 			}
-			log.Printf("recv: %s", msg)
+			log.Printf("recv: %s", msg.Message)
 		}
 	}()
 
@@ -73,7 +73,7 @@ func writeAtRegularIntervals(c *websocket.Conn,	username string, done chan struc
 				}
 
 				err := c.WriteJSON(msg)
-				log.Printf("sent: %s", msg)
+				log.Printf("sent: %s", msg.Message)
 				if err != nil {
 					log.Println("write:", err)
 					return
