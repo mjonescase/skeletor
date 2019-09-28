@@ -24,6 +24,7 @@ jobs:
 workflows:
   build_lint_test:
     jobs:
+      - prepare
       - test:
           name: test_server
           root: server
