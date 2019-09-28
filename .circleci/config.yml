@@ -5,6 +5,7 @@ orbs:
 
 jobs:
   prepare:
+    executor: go/default
     steps:
       - checkout
   test:
