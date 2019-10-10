@@ -7,6 +7,6 @@ import (
 func TestSucceed(t *testing.T) {
 }
 
-func TestFail(t *testing.T) {
-	t.Errorf("wrong, Wrong, WRONG!!!")
-}
+// func TestFail(t *testing.T) {
+// 	t.Errorf("wrong, Wrong, WRONG!!!")
+// }
