@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  go: circleci/go@0.2.0
+  go: circleci/go@1.0.0
 
 jobs:
   test:
@@ -15,9 +15,30 @@ jobs:
     executor: go/default
     steps:
       - checkout
+      - go/load-cache:
+          key: << parameters.root >>
+      - go/mod-download
+      - go/save-cache:
+          key: << parameters.root >>
+      - go/test:
+          covermode: atomic
+          failfast: true
+          race: true
+          packages: ./<< parameters.root >>/...
+  lint:
+    parameters:
+      root:
+        description: Root directory to CD into
+        type: enum
+        enum:
+          - server
+          - client
+    executor: go/default
+    steps:
+      - checkout
       - run: |
           cd << parameters.root >>
-          go test
+          
   
 workflows:
   build_lint_test:
